@@ -1,27 +1,23 @@
-pipeline{
-	agent any
-	stages{
-		stage("Pull Latest Image"){
-			steps{
-				sh "docker pull pratimaraj18/selenium-docker"
-			}
-		}
-		stage("Start Grid"){
-			steps{
-				sh "docker-compose up -d hub chrome firefox"
-			}
-		}
-		stage("Run Test"){
-			steps{
-				sh "docker-compose up search-module book-flight-module"
-			}
-		}
-	}
-	post{
-		always{
-			archiveArtifacts artifacts: 'output/**'
-			sh "docker-compose down"
-			sh "sudo rm -rf output/"
-		}
-	}
+pippipeline {
+    agent any
+    stages {
+        stage('Build Jar') {
+            steps {
+                bat "mvn clean package -DskipTests"
+            }
+        }
+        stage('Build Image') {
+            steps {
+                bat "docker build -t='pratimaraj18/selenium-docker' ."
+            }
+        }
+        stage('Push Image') {
+            steps {
+			    withCredentials([usernamePassword(credentialsId: 'dockerhub', passwordVariable: 'pass', usernameVariable: 'user')]) {
+			        bat "docker login --username=${user} --password=${pass}"
+			        bat "docker push pratimaraj18/selenium-docker:latest"
+			    }                           
+            }
+        }
+    }
 }
