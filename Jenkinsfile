@@ -4,7 +4,6 @@ pipeline{
 		stage("Pull Latest Image"){
 			steps{
 				sh "docker pull pratimaraj18/selenium-docker"
-
 			}
 		}
 		stage("Start Grid"){
